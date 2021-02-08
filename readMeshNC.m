@@ -16,6 +16,7 @@ function Mesh = readMeshNC(filename,varargin)
     plotMesh=0;
     readOS=0;
     readDeg=0;
+    type=1;
     for i = 1:2:length(varargin)
         switch varargin{i}
             case 'plotMesh'
@@ -24,29 +25,52 @@ function Mesh = readMeshNC(filename,varargin)
                 readOS = varargin{i+1};
             case 'readDeg'
                 readDeg = varargin{i+1};
+            case 'type'
+                type = varargin{i+1};
         end
     end
     
-    Mesh.uvnode=ncread(filename,'uvnode');
-    Mesh.nodexy=ncread(filename,'nodexy');
-    if (readOS==1)
-        Mesh.uvnode_os=ncread(filename,'uvnode_os');
-        Mesh.nodexy_os=ncread(filename,'nodexy_os');
-    end
-    if (readDeg==1)
-        Mesh.uvnode_deg=ncread(filename,'uvnode_deg');
-        Mesh.nodexy_deg=ncread(filename,'nodexy_deg');
+    if (type==1)
+        Mesh.uvnode=ncread(filename,'uvnode');
+        Mesh.nodexy=ncread(filename,'nodexy');
+        if (readOS==1)
+            Mesh.uvnode_os=ncread(filename,'uvnode_os');
+            Mesh.nodexy_os=ncread(filename,'nodexy_os');
+        end
+        if (readDeg==1)
+            Mesh.uvnode_deg=ncread(filename,'uvnode_deg');
+            Mesh.nodexy_deg=ncread(filename,'nodexy_deg');
+        end
+    
+        
+        Mesh.trinodes=ncread(filename,'trinodes');
+
+        Mesh.uvdepth=ncread(filename,'depthUvnode');
+        Mesh.depth=ncread(filename,'depthNodexy');
+        
+        Mesh.boundaryNodesAll=ncread(filename,'boundaryNodesAll');
+        Mesh.boundaryNodesOpen=ncread(filename,'boundaryNodesOpen');
+        Mesh.obc=ncread(filename,'boundaryNodesOpen');
+        Mesh.siglay=ncread(filename,'siglay');
+        
+    elseif (type==2)
+        lonc = ncread(filename,'lonc');
+        latc = ncread(filename,'latc');
+        Mesh.uvnode=[lonc,latc];
+        
+        lon = ncread(filename,'lon');
+        lat = ncread(filename,'lat');
+        Mesh.nodexy=[lon,lat];
+        
+        Mesh.trinodes=ncread(filename,'nv');
+        Mesh.uvdepth=ncread(filename,'h_center');
+        Mesh.depth=ncread(filename,'h');
+        
+        sl = ncread(filename,'siglay');
+        Mesh.siglay=sl(1,:);
     end
     
-    Mesh.trinodes=ncread(filename,'trinodes');
-    
-    Mesh.uvdepth=ncread(filename,'depthUvnode');
-    Mesh.depth=ncread(filename,'depthNodexy');
     Mesh.nbe=ncread(filename,'nbe');
-    Mesh.boundaryNodesAll=ncread(filename,'boundaryNodesAll');
-    Mesh.boundaryNodesOpen=ncread(filename,'boundaryNodesOpen');
-    Mesh.obc=ncread(filename,'boundaryNodesOpen');
-    Mesh.siglay=ncread(filename,'siglay');
 
     if plotMesh
         plotMeshPDens(Mesh);
